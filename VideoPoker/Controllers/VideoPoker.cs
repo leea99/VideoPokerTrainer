@@ -20,5 +20,11 @@ namespace VideoPoker.Controllers
             var test = _videoPokerService.DealCards();
             return View();
         }
+
+        public IActionResult DealCards()
+        {
+            var cards = _videoPokerService.DealCards();
+            return Json(cards);
+        }
     }
 }
