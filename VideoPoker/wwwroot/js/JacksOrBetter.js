@@ -35,8 +35,16 @@
 
 
     $('#cardRow').on('click', '.holdBtn', function () {
-        var holdLabel = $(this).parent().find('.holdLabel');
-        var card = $(this).parent().find('.playerCard');
+        ToggleHold($(this));
+    });
+
+    $('#cardRow').on('click', '.playerCard', function () {
+        ToggleHold($(this));
+    });
+
+    function ToggleHold(item) {
+        var holdLabel = $(item).parent().find('.holdLabel');
+        var card = $(item).parent().find('.playerCard');
         if (holdLabel.hasClass('d-none')) {
             holdLabel.removeClass('d-none');
             card.attr('held', true);
@@ -45,7 +53,7 @@
             holdLabel.addClass('d-none');
             card.removeAttr('held', true);
         }
-    });
+    }
 
     function GetHeldCards() {
         var heldCards = {};
