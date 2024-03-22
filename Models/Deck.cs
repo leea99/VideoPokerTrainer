@@ -1,36 +1,33 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Models.Statics;
 
 namespace Models
 {
     public class Deck
     {
+        [JsonProperty]
         private List<Card> cards;
+        [JsonProperty]
+        private int cardIndex;
 
-        public Deck()
-        {
-            InitializeDeck();
-        }
-
-        private void InitializeDeck()
+        public void InitializeDeck()
         {
             cards = new List<Card>();
 
-            string[] suits = { "Hearts", "Diamonds", "Clubs", "Spades" };
-            string[] ranks = { "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace" };
-
-            foreach (var suit in suits)
+            foreach (Suit suit in Enum.GetValues(typeof(Suit)))
             {
-                foreach (var rank in ranks)
+                foreach (Rank rank in Enum.GetValues(typeof(Rank)))
                 {
                     cards.Add(new Card(suit, rank));
                 }
             }
+            cardIndex = cards.Count - 1;
         }
-
         public void Shuffle()
         {
             Random rng = new Random();
@@ -51,6 +48,18 @@ namespace Models
             {
                 Console.WriteLine(card);
             }
+        }
+
+        public Card? GetCardInDeck()
+        {
+            if (cardIndex > 0)
+            {
+                var card = cards[cardIndex];
+                cards.RemoveAt(cardIndex);
+                cardIndex--;
+                return card;
+            }
+            return null;
         }
     }
 }
