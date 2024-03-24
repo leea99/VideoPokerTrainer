@@ -43,15 +43,17 @@
     });
 
     function ToggleHold(item) {
-        var holdLabel = $(item).parent().find('.holdLabel');
-        var card = $(item).parent().find('.playerCard');
-        if (holdLabel.hasClass('d-none')) {
-            holdLabel.removeClass('d-none');
-            card.attr('held', true);
-        }
-        else {
-            holdLabel.addClass('d-none');
-            card.removeAttr('held', true);
+        if ($('#dealButton').hasClass('d-none')) {
+            var holdLabel = $(item).parent().find('.holdLabel');
+            var card = $(item).parent().find('.playerCard');
+            if (holdLabel.hasClass('d-none')) {
+                holdLabel.removeClass('d-none');
+                card.attr('held', true);
+            }
+            else {
+                holdLabel.addClass('d-none');
+                card.removeAttr('held', true);
+            }
         }
     }
 

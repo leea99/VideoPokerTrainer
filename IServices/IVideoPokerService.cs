@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ViewModels;
+using static Models.Statics;
 
 namespace IServices
 {
@@ -12,5 +13,6 @@ namespace IServices
     {
         public Deck DealCards();
         VideoPokerCardsViewModel DrawCards(VideoPokerCardsViewModel heldCards, Deck deck);
+        WinnerType CheckJacksOrBetterWinners(VideoPokerCardsViewModel cards);
     }
 }

@@ -36,6 +36,7 @@ namespace VideoPoker.Controllers
                 Card4 = deck.GetCardInDeck(),
                 Card5 = deck.GetCardInDeck()
             };
+            videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
             HttpContext.Session.SetString("Deck", JsonConvert.SerializeObject(deck));
             return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", videoPokerCards);
         }
@@ -50,6 +51,7 @@ namespace VideoPoker.Controllers
                 if (deck != null)
                 {
                     var videoPokerCards = _videoPokerService.DrawCards(heldCards, deck);
+                    videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
                     return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", videoPokerCards);
                 }
             }
