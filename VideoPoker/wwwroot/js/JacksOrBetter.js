@@ -44,14 +44,15 @@
 
     function ToggleHold(item) {
         if ($('#dealButton').hasClass('d-none')) {
-            var holdLabel = $(item).parent().find('.holdLabel');
+            var holdLblDetails = $(item).attr('id').replace('hold', '#holdLbl');
+            var holdLbl = $(holdLblDetails);
             var card = $(item).parent().find('.playerCard');
-            if (holdLabel.hasClass('d-none')) {
-                holdLabel.removeClass('d-none');
+            if (holdLbl.hasClass('d-none')) {
+                holdLbl.removeClass('d-none');
                 card.attr('held', true);
             }
             else {
-                holdLabel.addClass('d-none');
+                holdLbl.addClass('d-none');
                 card.removeAttr('held', true);
             }
         }
