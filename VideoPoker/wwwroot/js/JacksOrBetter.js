@@ -35,16 +35,17 @@
 
 
     $('#cardRow').on('click', '.holdBtn', function () {
-        ToggleHold($(this));
+        var holdLblDetails = $(item).attr('id').replace('hold', '#holdLbl');
+        ToggleHold($(this), holdLblDetails);
     });
 
     $('#cardRow').on('click', '.playerCard', function () {
-        ToggleHold($(this));
+        var holdLblDetails = $(this).attr('id').replace('card', '#holdLbl');
+        ToggleHold($(this), holdLblDetails);
     });
 
-    function ToggleHold(item) {
+    function ToggleHold(item, holdLblDetails) {
         if ($('#dealButton').hasClass('d-none')) {
-            var holdLblDetails = $(item).attr('id').replace('hold', '#holdLbl');
             var holdLbl = $(holdLblDetails);
             var card = $(item).parent().find('.playerCard');
             if (holdLbl.hasClass('d-none')) {
