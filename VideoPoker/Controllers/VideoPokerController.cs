@@ -4,6 +4,7 @@ using Models;
 using Newtonsoft.Json;
 using System.Text.Json.Serialization;
 using ViewModels;
+using static Models.Statics;
 
 namespace VideoPoker.Controllers
 {
@@ -21,8 +22,12 @@ namespace VideoPoker.Controllers
 
         public IActionResult JacksOrBetter()
         {
-            var test = _videoPokerService.DealCards();
-            return View();
+            var vm = new VideoPokerGameViewModel()
+            {
+                PayTable = _videoPokerService.GetPayTable(GameType.JacksOrBetter),
+                Winnings = 0,
+            };
+            return View(vm);
         }
 
         public IActionResult DealCards()

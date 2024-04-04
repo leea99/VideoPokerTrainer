@@ -1,0 +1,23 @@
+﻿@model ViewModels.VideoPokerGameViewModel
+
+<table id="payTable">
+    <thead></thead>
+    <tbody>
+        @if (Model.PayTable != null)
+        {
+            @foreach (var entry in Model.PayTable)
+            {
+                <tr>
+                    <td>@Models.EnumExtensions.GetDisplayName(entry.WinnerType)</td>
+                    @if (entry.Payouts != null)
+                    {
+                        @foreach (var payoutEntry in entry.Payouts)
+                        {
+                            <td>@payoutEntry.Value</td>
+                        }
+                    }
+                </tr>
+            }
+        }
+    </tbody>
+</table>

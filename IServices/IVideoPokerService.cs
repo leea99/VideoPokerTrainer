@@ -14,5 +14,6 @@ namespace IServices
         public Deck DealCards();
         VideoPokerCardsViewModel DrawCards(VideoPokerCardsViewModel heldCards, Deck deck);
         WinnerType CheckJacksOrBetterWinners(VideoPokerCardsViewModel cards);
+        PayTableItem[]? GetPayTable(GameType gameType);
     }
 }

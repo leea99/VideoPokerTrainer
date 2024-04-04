@@ -55,6 +55,11 @@ namespace Models
             [Display(Name = "Royal Flush")]
             RoyalFlush
         }
+
+        public enum GameType : byte
+        {
+            JacksOrBetter
+        }
     }
 
     public static class EnumExtensions
