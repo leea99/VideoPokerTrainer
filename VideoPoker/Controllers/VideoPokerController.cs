@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Newtonsoft.Json;
+using System.Security.AccessControl;
 using System.Text.Json.Serialization;
 using ViewModels;
 using static Models.Statics;
@@ -22,9 +23,20 @@ namespace VideoPoker.Controllers
 
         public IActionResult JacksOrBetter()
         {
+            PayTableItem[]? payTable;
+            var payTableStr = HttpContext.Session.GetString("Deck");
+            if (payTableStr == null)
+            {
+                payTable = _videoPokerService.GetPayTable(GameType.JacksOrBetter);
+                HttpContext.Session.SetString("PayTable", JsonConvert.SerializeObject(payTableStr));
+            }
+            else
+            {
+                payTable = JsonConvert.DeserializeObject<PayTableItem[]>(payTableStr);
+            }
             var vm = new VideoPokerGameViewModel()
             {
-                PayTable = _videoPokerService.GetPayTable(GameType.JacksOrBetter),
+                PayTable = payTable,
                 Winnings = 0,
             };
             return View(vm);

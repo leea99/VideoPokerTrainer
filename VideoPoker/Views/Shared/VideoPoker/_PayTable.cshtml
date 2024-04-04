@@ -7,13 +7,13 @@
         {
             @foreach (var entry in Model.PayTable)
             {
-                <tr>
-                    <td>@Models.EnumExtensions.GetDisplayName(entry.WinnerType)</td>
+                <tr class="payTableRow">
+                    <td class="winnerTypeEntry" winnerType="@entry.WinnerType">@Models.EnumExtensions.GetDisplayName(entry.WinnerType)</td>
                     @if (entry.Payouts != null)
                     {
                         @foreach (var payoutEntry in entry.Payouts)
                         {
-                            <td>@payoutEntry.Value</td>
+                            <td class="payoutEntry" creditAmount="@payoutEntry.Key">@payoutEntry.Value</td>
                         }
                     }
                 </tr>
