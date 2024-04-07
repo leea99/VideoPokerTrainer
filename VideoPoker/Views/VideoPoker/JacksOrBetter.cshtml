@@ -1,15 +1,21 @@
 ﻿@model ViewModels.VideoPokerGameViewModel
 <div class="text-center">
-    <div class="row">
+    <div class="row" id="payTableHolder">
         @await Html.PartialAsync("~/Views/Shared/VideoPoker/_PayTable.cshtml", Model)
     </div>
     <div class="row" id="cardRow">
-        @await Html.PartialAsync("~/Views/Shared/VideoPoker/_CardRow.cshtml", new ViewModels.VideoPokerCardsViewModel())
+        @await Html.PartialAsync("~/Views/Shared/VideoPoker/_CardRow.cshtml", new ViewModels.VideoPokerHandViewModel())
     </div>
     <div class="row">
-        <div class="col-12">
+        <div class="col-4">
+            <button class="changeWager" id="betOne">Bet One</button>
+        </div>
+        <div class="col-4">
             <button id="dealButton">Deal</button>
             <button class="d-none" id="drawButton">Draw</button>
+        </div>
+        <div class="col-4">
+            <button class="changeWager" id="betMax">Bet Max</button>
         </div>
     </div>
 </div>

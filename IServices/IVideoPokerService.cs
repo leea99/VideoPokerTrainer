@@ -12,8 +12,12 @@ namespace IServices
     public interface IVideoPokerService
     {
         public Deck DealCards();
-        VideoPokerCardsViewModel DrawCards(VideoPokerCardsViewModel heldCards, Deck deck);
-        WinnerType CheckJacksOrBetterWinners(VideoPokerCardsViewModel cards);
+        VideoPokerHandViewModel DrawCards(VideoPokerHandViewModel heldCards, Deck deck);
+        WinnerType CheckJacksOrBetterWinners(VideoPokerHandViewModel cards);
         PayTableItem[]? GetPayTable(GameType gameType);
+        int GetWonCredits(PayTableItem[]? payTable, WinnerType winnerType, int wager);
+        int GetLowestWagerAmount(PayTableItem[]? payTable);
+        int? BetOne(PayTableItem[]? payTable, int currentWager);
+        public int? BetMax(PayTableItem[]? payTable);
     }
 }

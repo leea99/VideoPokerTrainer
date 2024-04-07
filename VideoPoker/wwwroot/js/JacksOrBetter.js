@@ -16,7 +16,6 @@
 
     $('#drawButton').click(function () {
         var heldCards = GetHeldCards();
-        console.log(heldCards);
         $.ajax({
             url: '/VideoPoker/DrawCards',
             method: 'POST',
@@ -89,4 +88,30 @@
         });
         return heldCards;
     }
+
+    $('#betOne').click(function () {
+        $.ajax({
+            url: '/VideoPoker/IncreaseWagerByOne',
+            method: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                $('#payTableHolder').html(data);
+            },
+            error: function (xhr, status, error) {
+            }
+        });
+    });
+
+    $('#betMax').click(function () {
+        $.ajax({
+            url: '/VideoPoker/MaxWager',
+            method: 'POST',
+            contentType: 'application/json',
+            success: function (data) {
+                $('#payTableHolder').html(data);
+            },
+            error: function (xhr, status, error) {
+            }
+        });
+    });
 });

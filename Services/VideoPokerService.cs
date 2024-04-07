@@ -1,6 +1,7 @@
 ﻿using IServices;
 using Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,7 @@ namespace Services
             return deck;
         }
 
-        public VideoPokerCardsViewModel DrawCards(VideoPokerCardsViewModel heldCards, Deck deck)
+        public VideoPokerHandViewModel DrawCards(VideoPokerHandViewModel heldCards, Deck deck)
         {
             deck.Shuffle();
             if (heldCards.Card1 == null)
@@ -46,7 +47,7 @@ namespace Services
             return heldCards;
         }
 
-        public WinnerType CheckJacksOrBetterWinners(VideoPokerCardsViewModel cards)
+        public WinnerType CheckJacksOrBetterWinners(VideoPokerHandViewModel cards)
         {
             var cardList = GetCardList(cards);
             var flushWinner = CheckFlush(cardList);
@@ -73,7 +74,7 @@ namespace Services
             return CheckXOfKind(cardList);
         }
 
-        private List<Card> GetCardList(VideoPokerCardsViewModel cards)
+        private List<Card> GetCardList(VideoPokerHandViewModel cards)
         {
             var list = new List<Card>();
             if (cards != null)
@@ -173,6 +174,76 @@ namespace Services
                         new PayTableItem(WinnerType.TwoPair,  new Dictionary<int, int> { {1, 2}, {2, 4}, {3, 6}, {4, 8}, {5, 10} }),
                         new PayTableItem(WinnerType.JacksOrBetter,  new Dictionary<int, int> { {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5} }),
                     };
+            }
+            return null;
+        }
+
+        public int GetWonCredits(PayTableItem[]? payTable, WinnerType winnerType, int wager)
+        {
+            int creditsWon = 0;
+            if (payTable != null)
+            {
+                var payTableEntryMatch = payTable.FirstOrDefault(x => x.WinnerType == winnerType);
+                if (payTableEntryMatch != null && payTableEntryMatch.Payouts != null)
+                {
+                    creditsWon = payTableEntryMatch.Payouts.FirstOrDefault(x => x.Value == wager).Value;
+                }
+            }
+            return creditsWon;
+        }
+
+        public int GetLowestWagerAmount(PayTableItem[]? payTable)
+        {
+            int wagerAmount = 0;
+            if (payTable != null)
+            {
+                var firstEntry = payTable.FirstOrDefault();
+                if (firstEntry != null && firstEntry.Payouts != null)
+                {
+                    wagerAmount = firstEntry.Payouts.FirstOrDefault().Key;
+                }
+            }
+            return wagerAmount;
+        }
+
+        public int? BetOne(PayTableItem[]? payTable, int currentWager)
+        {
+            if (payTable != null)
+            {
+                var firstEntry = payTable.FirstOrDefault();
+                if (firstEntry != null && firstEntry.Payouts != null)
+                {
+                    List<int> sortedKeys = firstEntry.Payouts.Keys.ToList();
+                    sortedKeys.Sort();
+
+                    for (int i = 0; i < sortedKeys.Count; i++)
+                    {
+                        if (sortedKeys[i] == currentWager)
+                        {
+                            if (i == sortedKeys.Count - 1)
+                            {
+                                return sortedKeys[0];
+                            }
+                            return sortedKeys[++i];
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        public int? BetMax(PayTableItem[]? payTable)
+        {
+            if (payTable != null)
+            {
+                var firstEntry = payTable.FirstOrDefault();
+                if (firstEntry != null && firstEntry.Payouts != null)
+                {
+                    List<int> sortedKeys = firstEntry.Payouts.Keys.ToList();
+                    sortedKeys.Sort();
+
+                    return sortedKeys.Last();
+                }
             }
             return null;
         }

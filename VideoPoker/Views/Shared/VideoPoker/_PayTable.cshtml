@@ -1,6 +1,6 @@
 ﻿@model ViewModels.VideoPokerGameViewModel
 
-<table id="payTable">
+<table id="payTable" wagerAmount=@Model.CreditsWagered>
     <thead></thead>
     <tbody>
         @if (Model.PayTable != null)
@@ -13,7 +13,7 @@
                     {
                         @foreach (var payoutEntry in entry.Payouts)
                         {
-                            <td class="payoutEntry" creditAmount="@payoutEntry.Key">@payoutEntry.Value</td>
+                            <td class="payoutEntry @(payoutEntry.Key == Model.CreditsWagered ? "activePayCol" : "")" creditAmount="@payoutEntry.Key">@payoutEntry.Value</td>
                         }
                     }
                 </tr>

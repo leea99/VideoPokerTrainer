@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "IServices": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51894;http://localhost:51896"
+    }
+  }
+}
