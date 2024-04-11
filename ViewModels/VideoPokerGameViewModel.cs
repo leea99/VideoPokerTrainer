@@ -1,12 +1,14 @@
 ﻿using System;
 using ViewModels;
+using static Models.Statics;
 
 namespace ViewModels
 {
     public class VideoPokerGameViewModel
     {
-        public int CreditsWagered { get; set; }
+        public GameType? GameType { get; set; }
+        public int? CreditsWagered { get; set; }
         public PayTableItem[]? PayTable { get; set; }
-        public int Winnings { get; set; }
+        public int? Balance { get; set; }
     }
 }

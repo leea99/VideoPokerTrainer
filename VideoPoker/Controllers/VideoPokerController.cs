@@ -24,24 +24,28 @@ namespace VideoPoker.Controllers
 
         public IActionResult JacksOrBetter()
         {
-            PayTableItem[]? payTable = GetPayTableFromSession();
-            int? creditsWager = HttpContext.Session.GetInt32("CreditsWager");
-            HttpContext.Session.SetInt32("GameType", (int)GameType.JacksOrBetter);
-            if (payTable == null)
+            var gameSession = GetGameSession();
+            if (gameSession == null)
             {
-                payTable = _videoPokerService.GetPayTable(GameType.JacksOrBetter);
-                HttpContext.Session.SetString("PayTable", JsonConvert.SerializeObject(payTable));
+                gameSession = new VideoPokerGameViewModel();
             }
-            if (creditsWager == null)
+            if (gameSession.GameType == null)
             {
-                creditsWager = _videoPokerService.GetLowestWagerAmount(payTable);
-                HttpContext.Session.SetInt32("CreditsWager", creditsWager.GetValueOrDefault());
+                gameSession.GameType = GameType.JacksOrBetter;
             }
+            if (gameSession.PayTable == null)
+            {
+                gameSession.PayTable = _videoPokerService.GetPayTable(GameType.JacksOrBetter);
+            }
+            if (gameSession.CreditsWagered == null)
+            {
+                gameSession.CreditsWagered = _videoPokerService.GetLowestWagerAmount(gameSession.PayTable);
+            }
+            SetGameSession(gameSession);
             var vm = new VideoPokerGameViewModel()
             {
-                CreditsWagered = creditsWager.GetValueOrDefault(),
-                PayTable = payTable,
-                Winnings = 0,
+                CreditsWagered = gameSession.CreditsWagered.GetValueOrDefault(),
+                PayTable = gameSession.PayTable
             };
             return View(vm);
         }
@@ -49,6 +53,7 @@ namespace VideoPoker.Controllers
         public IActionResult DealCards()
         {
             var deck = _videoPokerService.DealCards();
+            int? creditsWager = GetWager();
             var videoPokerCards = new VideoPokerHandViewModel()
             {
                 Card1 = deck.GetCardInDeck(),
@@ -66,6 +71,7 @@ namespace VideoPoker.Controllers
         public IActionResult DrawCards([FromBody] VideoPokerHandViewModel? heldCards)
         {
             PayTableItem[]? payTable = GetPayTableFromSession();
+            int? wagerAmount = GetWager();
             var deckStr = HttpContext.Session.GetString("Deck");
             if (deckStr != null)
             {
@@ -74,7 +80,7 @@ namespace VideoPoker.Controllers
                 {
                     var videoPokerCards = _videoPokerService.DrawCards(heldCards, deck);
                     videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
-                    videoPokerCards.CreditsWon = _videoPokerService.GetWonCredits(payTable, videoPokerCards.WinnerType, videoPokerCards.CreditsWagered);
+                    videoPokerCards.CreditsWon = _videoPokerService.GetWonCredits(payTable, videoPokerCards.WinnerType, wagerAmount.GetValueOrDefault());
                     return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", videoPokerCards);
                 }
             }
@@ -84,19 +90,18 @@ namespace VideoPoker.Controllers
         [HttpPost]
         public IActionResult IncreaseWagerByOne()
         {
-            int? wagerAmount = HttpContext.Session.GetInt32("CreditsWager");
+            int? wagerAmount = GetWager();
             var payTable = GetPayTableFromSession();
             wagerAmount = _videoPokerService.BetOne(payTable, wagerAmount.GetValueOrDefault());
             if (!wagerAmount.HasValue)
             {
                 wagerAmount = _videoPokerService.GetLowestWagerAmount(payTable);
             }
-            HttpContext.Session.SetInt32("CreditsWager", wagerAmount.GetValueOrDefault());
+            UpdateWager(wagerAmount);
             var newVm = new VideoPokerGameViewModel()
             {
                 CreditsWagered = wagerAmount.GetValueOrDefault(),
-                PayTable = payTable,
-                Winnings = 0
+                PayTable = payTable
             };
             return PartialView("~/Views/Shared/VideoPoker/_PayTable.cshtml", newVm);
         }
@@ -110,25 +115,64 @@ namespace VideoPoker.Controllers
             {
                 wagerAmount = _videoPokerService.GetLowestWagerAmount(payTable);
             }
-            HttpContext.Session.SetInt32("CreditsWager", wagerAmount.GetValueOrDefault());
+            UpdateWager(wagerAmount);
             var newVm = new VideoPokerGameViewModel()
             {
                 CreditsWagered = wagerAmount.GetValueOrDefault(),
-                PayTable = payTable,
-                Winnings = 0
+                PayTable = payTable
             };
             return PartialView("~/Views/Shared/VideoPoker/_PayTable.cshtml", newVm);
+        }
+
+        private void SetGameSession(VideoPokerGameViewModel? gameSession)
+        {
+            if (gameSession != null)
+            {
+                HttpContext.Session.SetString("GameSession", JsonConvert.SerializeObject(gameSession));
+            }
+        }
+
+        private VideoPokerGameViewModel? GetGameSession()
+        {
+            VideoPokerGameViewModel? gameSession = null;
+            var gameSessionStr = HttpContext.Session.GetString("GameSession");
+            if (gameSessionStr != null)
+            {
+                gameSession = JsonConvert.DeserializeObject<VideoPokerGameViewModel>(gameSessionStr);
+            }
+            return gameSession;
         }
 
         private PayTableItem[]? GetPayTableFromSession()
         {
             PayTableItem[]? payTable = null;
-            var payTableStr = HttpContext.Session.GetString("PayTable");
-            if (payTableStr != null)
+            var gameSession = GetGameSession();
+            if (gameSession != null)
             {
-                payTable = JsonConvert.DeserializeObject<PayTableItem[]>(payTableStr);
+                payTable = gameSession.PayTable;
             }
             return payTable;
+        }
+
+        private int? GetWager()
+        {
+            int? wagerAmount = null;
+            var gameSession = GetGameSession();
+            if (gameSession != null)
+            {
+                wagerAmount = gameSession.CreditsWagered;
+            }
+            return wagerAmount;
+        }
+
+        private void UpdateWager(int? wagerAmount)
+        {
+            var gameSession = GetGameSession();
+            if (gameSession != null)
+            {
+                gameSession.CreditsWagered = wagerAmount;
+                SetGameSession(gameSession);
+            }
         }
     }
 }

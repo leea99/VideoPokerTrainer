@@ -186,7 +186,7 @@ namespace Services
                 var payTableEntryMatch = payTable.FirstOrDefault(x => x.WinnerType == winnerType);
                 if (payTableEntryMatch != null && payTableEntryMatch.Payouts != null)
                 {
-                    creditsWon = payTableEntryMatch.Payouts.FirstOrDefault(x => x.Value == wager).Value;
+                    creditsWon = payTableEntryMatch.Payouts.FirstOrDefault(x => x.Key == wager).Value;
                 }
             }
             return creditsWon;

@@ -11,7 +11,6 @@ namespace ViewModels
     public class VideoPokerHandViewModel
     {
         public WinnerType WinnerType { get; set; }
-        public int CreditsWagered { get; set; }
         public int CreditsWon { get; set; }
         public Card? Card1 { get; set; }
         public Card? Card2 { get; set; }
