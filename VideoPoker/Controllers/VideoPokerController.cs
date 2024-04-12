@@ -37,17 +37,19 @@ namespace VideoPoker.Controllers
             {
                 gameSession.PayTable = _videoPokerService.GetPayTable(GameType.JacksOrBetter);
             }
-            if (gameSession.CreditsWagered == null)
+            if (gameSession.HandViewModel == null)
             {
-                gameSession.CreditsWagered = _videoPokerService.GetLowestWagerAmount(gameSession.PayTable);
+                gameSession.HandViewModel = new VideoPokerHandViewModel()
+                {
+                    CreditsWagered = _videoPokerService.GetLowestWagerAmount(gameSession.PayTable)
+                };
+            }
+            if (gameSession.Balance == null)
+            {
+                gameSession.Balance = 5000;
             }
             SetGameSession(gameSession);
-            var vm = new VideoPokerGameViewModel()
-            {
-                CreditsWagered = gameSession.CreditsWagered.GetValueOrDefault(),
-                PayTable = gameSession.PayTable
-            };
-            return View(vm);
+            return View(gameSession);
         }
 
         public IActionResult DealCards()
@@ -62,9 +64,11 @@ namespace VideoPoker.Controllers
                 Card4 = deck.GetCardInDeck(),
                 Card5 = deck.GetCardInDeck()
             };
+            UpdateCreditBalance(creditsWager * -1);
+            videoPokerCards.CreditsWagered = creditsWager;
             videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
             HttpContext.Session.SetString("Deck", JsonConvert.SerializeObject(deck));
-            return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", videoPokerCards);
+            return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", UpdateHandData(videoPokerCards));
         }
 
         [HttpPost]
@@ -79,12 +83,21 @@ namespace VideoPoker.Controllers
                 if (deck != null)
                 {
                     var videoPokerCards = _videoPokerService.DrawCards(heldCards, deck);
+                    videoPokerCards.CreditsWagered = wagerAmount;
                     videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
                     videoPokerCards.CreditsWon = _videoPokerService.GetWonCredits(payTable, videoPokerCards.WinnerType, wagerAmount.GetValueOrDefault());
-                    return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", videoPokerCards);
+                    UpdateCreditBalance(videoPokerCards.CreditsWon);
+                    return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", UpdateHandData(videoPokerCards));
                 }
             }
             return RedirectToAction("DealCards");
+        }
+
+        private void UpdateCreditBalance(int? creditChange)
+        {
+            var gameData = GetGameSession();
+            gameData = _videoPokerService.UpdateGameBalance(gameData, creditChange);
+            SetGameSession(gameData);
         }
 
         [HttpPost]
@@ -100,7 +113,7 @@ namespace VideoPoker.Controllers
             UpdateWager(wagerAmount);
             var newVm = new VideoPokerGameViewModel()
             {
-                CreditsWagered = wagerAmount.GetValueOrDefault(),
+                HandViewModel = new VideoPokerHandViewModel(wagerAmount.GetValueOrDefault()),
                 PayTable = payTable
             };
             return PartialView("~/Views/Shared/VideoPoker/_PayTable.cshtml", newVm);
@@ -118,8 +131,8 @@ namespace VideoPoker.Controllers
             UpdateWager(wagerAmount);
             var newVm = new VideoPokerGameViewModel()
             {
-                CreditsWagered = wagerAmount.GetValueOrDefault(),
-                PayTable = payTable
+                HandViewModel = new VideoPokerHandViewModel(wagerAmount.GetValueOrDefault()),
+                PayTable = payTable,
             };
             return PartialView("~/Views/Shared/VideoPoker/_PayTable.cshtml", newVm);
         }
@@ -158,9 +171,9 @@ namespace VideoPoker.Controllers
         {
             int? wagerAmount = null;
             var gameSession = GetGameSession();
-            if (gameSession != null)
+            if (gameSession != null && gameSession.HandViewModel != null)
             {
-                wagerAmount = gameSession.CreditsWagered;
+                wagerAmount = gameSession.HandViewModel.CreditsWagered;
             }
             return wagerAmount;
         }
@@ -168,11 +181,18 @@ namespace VideoPoker.Controllers
         private void UpdateWager(int? wagerAmount)
         {
             var gameSession = GetGameSession();
-            if (gameSession != null)
+            if (gameSession != null && gameSession.HandViewModel != null)
             {
-                gameSession.CreditsWagered = wagerAmount;
+                gameSession.HandViewModel.CreditsWagered = wagerAmount;
                 SetGameSession(gameSession);
             }
+        }
+
+        private VideoPokerGameViewModel UpdateHandData(VideoPokerHandViewModel handVm)
+        {
+            var gameSession = GetGameSession();
+            gameSession.HandViewModel = handVm;
+            return gameSession;
         }
     }
 }

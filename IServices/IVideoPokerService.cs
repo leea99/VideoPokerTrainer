@@ -11,13 +11,14 @@ namespace IServices
 {
     public interface IVideoPokerService
     {
-        public Deck DealCards();
+        Deck DealCards();
         VideoPokerHandViewModel DrawCards(VideoPokerHandViewModel heldCards, Deck deck);
         WinnerType CheckJacksOrBetterWinners(VideoPokerHandViewModel cards);
         PayTableItem[]? GetPayTable(GameType gameType);
         int GetWonCredits(PayTableItem[]? payTable, WinnerType winnerType, int wager);
         int GetLowestWagerAmount(PayTableItem[]? payTable);
         int? BetOne(PayTableItem[]? payTable, int currentWager);
-        public int? BetMax(PayTableItem[]? payTable);
+        int? BetMax(PayTableItem[]? payTable);
+        VideoPokerGameViewModel? UpdateGameBalance(VideoPokerGameViewModel? gameData, int? creditChange);
     }
 }

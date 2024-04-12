@@ -1,7 +1,18 @@
-﻿@model ViewModels.VideoPokerHandViewModel
+﻿@model ViewModels.VideoPokerGameViewModel
 <div class="col-12">
     <div class="row">
-        <p>@Models.EnumExtensions.GetDisplayName(Model.WinnerType)</p>
+        <p>@Models.EnumExtensions.GetDisplayName(Model.HandViewModel.WinnerType)</p>
+    </div>
+</div>
+<div class="row">
+    <div class="col-4">
+        <label id="betAmount" wager="@Model.HandViewModel.CreditsWagered">Bet: @Model.HandViewModel.CreditsWagered</label>
+    </div>
+    <div class="col-4">
+        <label>@Model.HandViewModel.CreditsWon</label>
+    </div>
+    <div class="col-4">
+        <label>Credits: @Model.Balance</label>
     </div>
 </div>
 <div class="col-12">
@@ -31,32 +42,32 @@
 <div class="col">
     <div class="row justify-content-center">
         <div class="col-md-2 cardDiv" id="card1div">
-            <div class="playerCard" id="card1" suit="@(Model.Card1 != null ? (byte)Model.Card1.Suit : null)" rank="@(Model.Card1 != null ? (byte)Model.Card1.Rank : null)">
-                <img class="mw-100 mh-100" src="@(Model.Card1 != null ? Model.Card1.ImagePath : null)" alt="@Model.Card1?.ToString()" />
+            <div class="playerCard" id="card1" suit="@(Model.HandViewModel.Card1 != null ? (byte)Model.HandViewModel.Card1.Suit : null)" rank="@(Model.HandViewModel.Card1 != null ? (byte)Model.HandViewModel.Card1.Rank : null)">
+                <img class="mw-100 mh-100" src="@(Model.HandViewModel.Card1 != null ? Model.HandViewModel.Card1.ImagePath : null)" alt="@Model.HandViewModel.Card1?.ToString()" />
             </div>
             <button class="holdBtn" id="hold1">Hold</button>
         </div>
         <div class="col-md-2 cardDiv" id="card2div">
-            <div class="playerCard" id="card2" suit="@(Model.Card2 != null ? (byte)Model.Card2.Suit : null)" rank="@(Model.Card2 != null ? (byte)Model.Card2.Rank : null)">
-                <img class="mw-100 mh-100" src="@(Model.Card2 != null ? Model.Card2.ImagePath : null)" alt="@Model.Card2?.ToString()" />
+            <div class="playerCard" id="card2" suit="@(Model.HandViewModel.Card2 != null ? (byte)Model.HandViewModel.Card2.Suit : null)" rank="@(Model.HandViewModel.Card2 != null ? (byte)Model.HandViewModel.Card2.Rank : null)">
+                <img class="mw-100 mh-100" src="@(Model.HandViewModel.Card2 != null ? Model.HandViewModel.Card2.ImagePath : null)" alt="@Model.HandViewModel.Card2?.ToString()" />
             </div>
             <button class="holdBtn" id="hold2">Hold</button>
         </div>
         <div class="col-md-2 cardDiv" id="card3div">
-            <div class="playerCard" id="card3" suit="@(Model.Card3 != null ? (byte)Model.Card3.Suit : null)" rank="@(Model.Card3 != null ? (byte)Model.Card3.Rank : null)">
-                <img class="mw-100 mh-100" src="@(Model.Card3 != null ? Model.Card3.ImagePath : null)" alt="@Model.Card3?.ToString()" />
+            <div class="playerCard" id="card3" suit="@(Model.HandViewModel.Card3 != null ? (byte)Model.HandViewModel.Card3.Suit : null)" rank="@(Model.HandViewModel.Card3 != null ? (byte)Model.HandViewModel.Card3.Rank : null)">
+                <img class="mw-100 mh-100" src="@(Model.HandViewModel.Card3 != null ? Model.HandViewModel.Card3.ImagePath : null)" alt="@Model.HandViewModel.Card3?.ToString()" />
             </div>
             <button class="holdBtn" id="hold3">Hold</button>
         </div>
         <div class="col-md-2 cardDiv" id="card4div">
-            <div class="playerCard" id="card4" suit="@(Model.Card4 != null ? (byte)Model.Card4.Suit : null)" rank="@(Model.Card4 != null ? (byte)Model.Card4.Rank : null)">
-                <img class="mw-100 mh-100" src="@(Model.Card4 != null ? Model.Card4.ImagePath : null)" alt="@Model.Card4?.ToString()" />
+            <div class="playerCard" id="card4" suit="@(Model.HandViewModel.Card4 != null ? (byte)Model.HandViewModel.Card4.Suit : null)" rank="@(Model.HandViewModel.Card4 != null ? (byte)Model.HandViewModel.Card4.Rank : null)">
+                <img class="mw-100 mh-100" src="@(Model.HandViewModel.Card4 != null ? Model.HandViewModel.Card4.ImagePath : null)" alt="@Model.HandViewModel.Card4?.ToString()" />
             </div>
             <button class="holdBtn" id="hold4">Hold</button>
         </div>
         <div class="col-md-2 cardDiv" id="card5div">
-            <div class="playerCard" id="card5" suit="@(Model.Card5 != null ? (byte)Model.Card5.Suit : null)" rank="@(Model.Card5 != null ? (byte)Model.Card5.Rank : null)">
-                <img class="mw-100 mh-100" src="@(Model.Card5 != null ? Model.Card5.ImagePath : null)" alt="@Model.Card5?.ToString()" />
+            <div class="playerCard" id="card5" suit="@(Model.HandViewModel.Card5 != null ? (byte)Model.HandViewModel.Card5.Suit : null)" rank="@(Model.HandViewModel.Card5 != null ? (byte)Model.HandViewModel.Card5.Rank : null)">
+                <img class="mw-100 mh-100" src="@(Model.HandViewModel.Card5 != null ? Model.HandViewModel.Card5.ImagePath : null)" alt="@Model.HandViewModel.Card5?.ToString()" />
             </div>
             <button class="holdBtn" id="hold5">Hold</button>
         </div>

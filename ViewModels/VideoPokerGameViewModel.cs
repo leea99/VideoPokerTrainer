@@ -7,8 +7,8 @@ namespace ViewModels
     public class VideoPokerGameViewModel
     {
         public GameType? GameType { get; set; }
-        public int? CreditsWagered { get; set; }
         public PayTableItem[]? PayTable { get; set; }
+        public VideoPokerHandViewModel? HandViewModel { get; set; }
         public int? Balance { get; set; }
     }
 }

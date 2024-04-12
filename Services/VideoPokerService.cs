@@ -247,5 +247,21 @@ namespace Services
             }
             return null;
         }
+
+        public VideoPokerGameViewModel? UpdateGameBalance(VideoPokerGameViewModel? gameData, int? creditChange)
+        {
+            if (gameData == null)
+            {
+                return null;
+            }
+            else 
+            { 
+                if (creditChange != null)
+                {
+                    gameData.Balance += creditChange;
+                }
+            }
+            return gameData;
+        }
     }
 }

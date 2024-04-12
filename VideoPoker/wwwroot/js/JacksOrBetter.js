@@ -96,6 +96,7 @@
             contentType: 'application/json',
             success: function (data) {
                 $('#payTableHolder').html(data);
+                UpdateBetAmountUI();
             },
             error: function (xhr, status, error) {
             }
@@ -109,9 +110,18 @@
             contentType: 'application/json',
             success: function (data) {
                 $('#payTableHolder').html(data);
+                UpdateBetAmountUI();
             },
             error: function (xhr, status, error) {
             }
         });
     });
+
+    function UpdateBetAmountUI() {
+        var betAmount = $('#betAmount');
+        console.log($('.activePayCol:first'));
+        var newBetAmount = $('.activePayCol:first').attr('creditamount');
+        betAmount.attr('wager', newBetAmount);
+        betAmount.text('Bet: ' + newBetAmount);
+    }
 });
