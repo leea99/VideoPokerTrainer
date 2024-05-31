@@ -61,5 +61,10 @@ namespace Models
             }
             return null;
         }
+
+        public List<Card> GetCurrentDeck()
+        {
+            return cards;
+        }
     }
 }

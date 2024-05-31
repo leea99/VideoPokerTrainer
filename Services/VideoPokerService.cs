@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using ViewModels;
@@ -262,6 +263,100 @@ namespace Services
                 }
             }
             return gameData;
+        }
+
+        public List<HoldInfo> CalculateBestHolds(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable)
+        {
+            List<Card?> handCards = new List<Card?>()
+            {
+                hand.Card1,
+                hand.Card2,
+                hand.Card3,
+                hand.Card4,
+                hand.Card5,
+            };
+            var combo = new List<List<Card>>();
+            GenerateCombinations(deck, hand, handCards, 0, new List<Card>(), combo);
+            List<HoldInfo> expectedCred = new List<HoldInfo>();
+            foreach (var c in combo)
+            {
+                var outcomeTotals = InitializeComboDictionary();
+                GetCombinationsRecursive(deck.GetCurrentDeck(), hand, c, 0, 5, outcomeTotals);
+                double totalPayout = 0;
+                int totalOutcomes = outcomeTotals.Values.Sum();
+                foreach (var result in outcomeTotals)
+                {
+                    double prob = (double)result.Value / (double)totalOutcomes;
+                    totalPayout += GetWonCredits(payTable, result.Key, hand.CreditsWagered.GetValueOrDefault()) * prob;
+                }
+                expectedCred.Add(new HoldInfo()
+                {
+                    HeldCards = c,
+                    Outcomes = outcomeTotals,
+                    ExpectedCredits = totalPayout
+                });
+            }
+            return expectedCred.OrderByDescending(x => x.ExpectedCredits).ToList();
+        }
+
+        private void GenerateCombinations(Deck? deck, VideoPokerHandViewModel hand, List<Card> cards, int index, List<Card> current, List<List<Card>> results)
+        {
+            if (index == cards.Count)
+            {
+                results.Add(new List<Card>(current));
+                //GetCombinationsRecursive(deck.GetCurrentDeck(), hand, current, 0, 5, InitializeComboDictionary());
+                return;
+            }
+
+            // Exclude the current card and move to the next
+            GenerateCombinations(deck, hand, cards, index + 1, current, results);
+
+            // Include the current card and move to the next
+            current.Add(cards[index]);
+            GenerateCombinations(deck, hand, cards, index + 1, current, results);
+
+            // Backtrack and remove the last added card
+            current.RemoveAt(current.Count - 1);
+        }
+
+        private Dictionary<WinnerType, int> InitializeComboDictionary()
+        {
+            return new Dictionary<WinnerType, int>()
+            {
+                { WinnerType.None, 0 },
+                { WinnerType.JacksOrBetter, 0 },
+                { WinnerType.TwoPair, 0 },
+                { WinnerType.ThreeKind, 0 },
+                { WinnerType.Straight, 0 },
+                { WinnerType.Flush, 0 },
+                { WinnerType.FullHouse, 0 },
+                { WinnerType.FourKind, 0 },
+                { WinnerType.StraightFlush, 0 },
+                { WinnerType.RoyalFlush, 0 },
+            };
+        }
+
+
+        private void GetCombinationsRecursive(List<Card> deck, VideoPokerHandViewModel hand, List<Card> currentCombination, int start, int combinationSize, Dictionary<WinnerType, int> results)
+        {
+            if (currentCombination.Count == combinationSize)
+            {
+                hand.Card1 = currentCombination[0];
+                hand.Card2 = currentCombination[1];
+                hand.Card3 = currentCombination[2];
+                hand.Card4 = currentCombination[3];
+                hand.Card5 = currentCombination[4];
+                var winType = CheckJacksOrBetterWinners(hand);
+                results[winType]++;
+                return;
+            }
+
+            for (int i = start; i <= deck.Count - (combinationSize - currentCombination.Count); i++)
+            {
+                currentCombination.Add(deck[i]);
+                GetCombinationsRecursive(deck, hand, currentCombination, i + 1, combinationSize, results);
+                currentCombination.RemoveAt(currentCombination.Count - 1);
+            }
         }
     }
 }

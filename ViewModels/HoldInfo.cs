@@ -1,0 +1,17 @@
+﻿using Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using static Models.Statics;
+
+namespace ViewModels
+{
+    public class HoldInfo
+    {
+        public List<Card> HeldCards { get; set; }
+        public Dictionary<WinnerType, int>? Outcomes { get; set; }
+        public double ExpectedCredits { get; set; }
+    }
+}

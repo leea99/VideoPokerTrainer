@@ -54,6 +54,7 @@ namespace VideoPoker.Controllers
 
         public IActionResult DealCards()
         {
+            PayTableItem[]? payTable = GetPayTableFromSession();
             var deck = _videoPokerService.DealCards();
             int? creditsWager = GetWager();
             var videoPokerCards = new VideoPokerHandViewModel()
@@ -68,6 +69,7 @@ namespace VideoPoker.Controllers
             videoPokerCards.CreditsWagered = creditsWager;
             videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
             HttpContext.Session.SetString("Deck", JsonConvert.SerializeObject(deck));
+            var bestHolds = _videoPokerService.CalculateBestHolds(deck, videoPokerCards, payTable);
             return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", UpdateHandData(videoPokerCards));
         }
 
