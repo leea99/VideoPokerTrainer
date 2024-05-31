@@ -9,6 +9,7 @@ namespace ViewModels
         public GameType? GameType { get; set; }
         public PayTableItem[]? PayTable { get; set; }
         public VideoPokerHandViewModel? HandViewModel { get; set; }
+        public List<HoldInfo> HoldInfo { get; set; }
         public int? Balance { get; set; }
     }
 }

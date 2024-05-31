@@ -70,7 +70,9 @@ namespace VideoPoker.Controllers
             videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
             HttpContext.Session.SetString("Deck", JsonConvert.SerializeObject(deck));
             var bestHolds = _videoPokerService.CalculateBestHolds(deck, videoPokerCards, payTable);
-            return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", UpdateHandData(videoPokerCards));
+            var handData = UpdateHandData(videoPokerCards);
+            handData.HoldInfo = bestHolds;
+            return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", handData);
         }
 
         [HttpPost]

@@ -73,3 +73,32 @@
         </div>
     </div>
 </div>
+<div class="row">
+    @if (Model.HoldInfo != null)
+    {
+        <table>
+            <thead>
+            <th>Held Card</th>
+            <th>Expected Return</th>
+            </thead>
+            <tbody>
+                @foreach (var hold in Model.HoldInfo)
+                {
+                    <tr>
+                        @{
+                            string cardsStr = "";
+                            foreach (var card in hold.HeldCards)
+                            {
+                                cardsStr += card.ToString() + " ";
+                            }
+                        }
+                        <td>
+                            @cardsStr
+                        </td>
+                        <td>@hold.ExpectedCredits</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
