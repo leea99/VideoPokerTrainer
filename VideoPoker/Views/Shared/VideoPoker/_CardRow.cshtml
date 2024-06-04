@@ -3,6 +3,15 @@
     <div class="row">
         <p>@Models.EnumExtensions.GetDisplayName(Model.HandViewModel.WinnerType)</p>
     </div>
+    <div class="row">
+        @if (Model.HoldInfo != null)
+        {
+            @foreach (var hold in Model.HoldInfo)
+            {
+                <p shorthand="@hold.HoldShorthand" class="holdShorthand d-none">@("Expected Value of Hold: " + hold.ExpectedCredits)</p>
+            }
+        }
+    </div>
 </div>
 <div class="row">
     <div class="col-4">
@@ -73,13 +82,15 @@
         </div>
     </div>
 </div>
-<div class="row">
+<div class="row d-none">
     @if (Model.HoldInfo != null)
     {
         <table>
             <thead>
-            <th>Held Card</th>
-            <th>Expected Return</th>
+                <tr>
+                    <th>Held Card</th>
+                    <th>Expected Return</th>
+                </tr>
             </thead>
             <tbody>
                 @foreach (var hold in Model.HoldInfo)

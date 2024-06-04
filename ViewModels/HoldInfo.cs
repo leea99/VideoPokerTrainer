@@ -11,6 +11,7 @@ namespace ViewModels
     public class HoldInfo
     {
         public List<Card> HeldCards { get; set; }
+        public string HoldShorthand { get; set; }
         public Dictionary<WinnerType, int>? Outcomes { get; set; }
         public double ExpectedCredits { get; set; }
     }

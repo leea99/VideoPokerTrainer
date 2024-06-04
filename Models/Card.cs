@@ -30,6 +30,20 @@ namespace Models
             return $"{Rank} of {Suit}";
         }
 
+        public string GetShorthandStr()
+        {
+            string shortHandStr = Suit.ToString()[0].ToString();
+            if (Rank <= Rank.Ten)
+            {
+                shortHandStr = ((byte)Rank).ToString() + shortHandStr;
+            }
+            else
+            {
+                shortHandStr = Rank.ToString()[0].ToString() + shortHandStr;
+            }
+            return shortHandStr;
+        }
+
         public string GetImagePath(Suit suit, Rank rank)
         {
             string fileName;

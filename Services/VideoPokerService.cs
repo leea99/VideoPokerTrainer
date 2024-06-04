@@ -130,7 +130,7 @@ namespace Services
             }
             return true;
         }
-        
+
         private WinnerType CheckXOfKind(List<Card> cards)
         {
             var rankSortedCards = cards.GroupBy(x => x.Rank).OrderByDescending(x => x.Count()).ToArray();
@@ -255,8 +255,8 @@ namespace Services
             {
                 return null;
             }
-            else 
-            { 
+            else
+            {
                 if (creditChange != null)
                 {
                     gameData.Balance += creditChange;
@@ -292,6 +292,7 @@ namespace Services
                 expectedCred.Add(new HoldInfo()
                 {
                     HeldCards = c,
+                    HoldShorthand = GetHandShort(c),
                     Outcomes = outcomeTotals,
                     ExpectedCredits = totalPayout
                 });
@@ -357,6 +358,20 @@ namespace Services
                 GetCombinationsRecursive(deck, hand, currentCombination, i + 1, combinationSize, results);
                 currentCombination.RemoveAt(currentCombination.Count - 1);
             }
+        }
+
+        public string GetHandShort(List<Card> heldCards)
+        {
+            if (heldCards.Count == 0)
+            {
+                return "Discard All";
+            }
+            string shorthandStr = "";
+            foreach (var card in heldCards)
+            {
+                shorthandStr += card.GetShorthandStr();
+            }
+            return shorthandStr;
         }
     }
 }

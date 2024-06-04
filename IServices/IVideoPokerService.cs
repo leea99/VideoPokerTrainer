@@ -21,5 +21,6 @@ namespace IServices
         int? BetMax(PayTableItem[]? payTable);
         VideoPokerGameViewModel? UpdateGameBalance(VideoPokerGameViewModel? gameData, int? creditChange);
         List<HoldInfo> CalculateBestHolds(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable);
+        string GetHandShort(List<Card> heldCards);
     }
 }

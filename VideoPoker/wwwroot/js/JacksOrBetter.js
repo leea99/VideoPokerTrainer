@@ -63,10 +63,7 @@
         $('.playerCard').each(function (index, card) {
             var cardDetails = null;
             if ($(card).attr('held') === 'true') {
-                cardDetails = {
-                    Suit: parseInt($(card).attr('suit')),
-                    Rank: parseInt($(card).attr('rank'))
-                };
+                cardDetails = GetCardDetail(card);
             }
             switch (index) {
                 case 0:
@@ -87,6 +84,13 @@
             }
         });
         return heldCards;
+    }
+
+    function GetCardDetail(card) {
+        return {
+            Suit: parseInt($(card).attr('suit')),
+            Rank: parseInt($(card).attr('rank'))
+        };
     }
 
     $('#betOne').click(function () {
