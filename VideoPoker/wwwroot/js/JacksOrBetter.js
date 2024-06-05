@@ -56,6 +56,7 @@
                 card.removeAttr('held', true);
             }
         }
+        ShowEV();
     }
 
     function GetHeldCards() {
@@ -127,5 +128,25 @@
         var newBetAmount = $('.activePayCol:first').attr('creditamount');
         betAmount.attr('wager', newBetAmount);
         betAmount.text('Bet: ' + newBetAmount);
+    }
+
+    function ShowEV() {
+        var heldCards = GetHeldCards();
+        $.ajax({
+            url: '/VideoPoker/GetHeldShorthand',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(heldCards), // Convert data to JSON string
+            success: function (data) {
+                console.log(data);
+                var match = $('.holdShorthand[shorthand="' + data + '"]');
+                console.log(match);
+                $('.holdShorthand').addClass('d-none');
+                match.removeClass('d-none');
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching partial view:', error);
+            }
+        });
     }
 });

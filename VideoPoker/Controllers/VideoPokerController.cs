@@ -141,6 +141,13 @@ namespace VideoPoker.Controllers
             return PartialView("~/Views/Shared/VideoPoker/_PayTable.cshtml", newVm);
         }
 
+        [HttpPost]
+        public IActionResult GetHeldShorthand([FromBody] VideoPokerHandViewModel? heldCards)
+        {
+            var heldList = _videoPokerService.GetCardList(heldCards);
+            return Json(_videoPokerService.GetHandShort(heldList));
+        }
+
         private void SetGameSession(VideoPokerGameViewModel? gameSession)
         {
             if (gameSession != null)

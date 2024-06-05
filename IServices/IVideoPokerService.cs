@@ -14,6 +14,7 @@ namespace IServices
         Deck DealCards();
         VideoPokerHandViewModel DrawCards(VideoPokerHandViewModel heldCards, Deck deck);
         WinnerType CheckJacksOrBetterWinners(VideoPokerHandViewModel cards);
+        List<Card> GetCardList(VideoPokerHandViewModel cards);
         PayTableItem[]? GetPayTable(GameType gameType);
         int GetWonCredits(PayTableItem[]? payTable, WinnerType winnerType, int wager);
         int GetLowestWagerAmount(PayTableItem[]? payTable);

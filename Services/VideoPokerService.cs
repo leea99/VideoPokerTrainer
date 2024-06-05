@@ -50,7 +50,7 @@ namespace Services
 
         public WinnerType CheckJacksOrBetterWinners(VideoPokerHandViewModel cards)
         {
-            var cardList = GetCardList(cards);
+            var cardList = GetCardList(cards).OrderBy(x => x.Rank).ToList();
             var flushWinner = CheckFlush(cardList);
             var straightWinner = CheckStraight(cardList);
             if (flushWinner && straightWinner)
@@ -75,7 +75,7 @@ namespace Services
             return CheckXOfKind(cardList);
         }
 
-        private List<Card> GetCardList(VideoPokerHandViewModel cards)
+        public List<Card> GetCardList(VideoPokerHandViewModel cards)
         {
             var list = new List<Card>();
             if (cards != null)
@@ -101,7 +101,7 @@ namespace Services
                     list.Add(cards.Card5);
                 }
             }
-            return list.OrderBy(x => x.Rank).ToList();
+            return list;
         }
 
         private bool CheckFlush(List<Card> cards)
