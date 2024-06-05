@@ -8,7 +8,7 @@
         {
             @foreach (var hold in Model.HoldInfo)
             {
-                <p shorthand="@hold.HoldShorthand" class="holdShorthand d-none">@("Expected Value of Hold: " + hold.ExpectedCredits)</p>
+                <p shorthand="@hold.HoldShorthand" class="holdShorthand d-none">@("Expected Value of Hold: " + hold.ExpectedCredits.ToString("0.000"))</p>
             }
         }
     </div>

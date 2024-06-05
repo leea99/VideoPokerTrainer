@@ -1,5 +1,6 @@
 ﻿using Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace ViewModels
     {
         public List<Card> HeldCards { get; set; }
         public string HoldShorthand { get; set; }
-        public Dictionary<WinnerType, int>? Outcomes { get; set; }
+        public ConcurrentDictionary<WinnerType, int>? Outcomes { get; set; }
         public double ExpectedCredits { get; set; }
     }
 }

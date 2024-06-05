@@ -2,6 +2,7 @@
 using Models;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
@@ -277,11 +278,20 @@ namespace Services
             };
             var combo = new List<List<Card>>();
             GenerateCombinations(deck, hand, handCards, 0, new List<Card>(), combo);
-            List<HoldInfo> expectedCred = new List<HoldInfo>();
-            foreach (var c in combo)
+            var expectedCred = new ConcurrentBag<HoldInfo>();
+            Parallel.ForEach(combo, c =>
             {
-                var outcomeTotals = InitializeComboDictionary();
-                GetCombinationsRecursive(deck.GetCurrentDeck(), hand, c, 0, 5, outcomeTotals);
+                var outcomeTotals = InitializeComboDictionary(); 
+                var localHand = new VideoPokerHandViewModel()
+                {
+                    Card1 = hand.Card1,
+                    Card2 = hand.Card2,
+                    Card3 = hand.Card3,
+                    Card4 = hand.Card4,
+                    Card5 = hand.Card5,
+                    CreditsWagered = hand.CreditsWagered
+                };
+                GetCombinationsRecursive(deck.GetCurrentDeck(), localHand, c, 0, 5, outcomeTotals);
                 double totalPayout = 0;
                 int totalOutcomes = outcomeTotals.Values.Sum();
                 foreach (var result in outcomeTotals)
@@ -296,7 +306,7 @@ namespace Services
                     Outcomes = outcomeTotals,
                     ExpectedCredits = totalPayout
                 });
-            }
+            });
             return expectedCred.OrderByDescending(x => x.ExpectedCredits).ToList();
         }
 
@@ -320,25 +330,24 @@ namespace Services
             current.RemoveAt(current.Count - 1);
         }
 
-        private Dictionary<WinnerType, int> InitializeComboDictionary()
+        private ConcurrentDictionary<WinnerType, int> InitializeComboDictionary()
         {
-            return new Dictionary<WinnerType, int>()
+            return new ConcurrentDictionary<WinnerType, int>(new[]
             {
-                { WinnerType.None, 0 },
-                { WinnerType.JacksOrBetter, 0 },
-                { WinnerType.TwoPair, 0 },
-                { WinnerType.ThreeKind, 0 },
-                { WinnerType.Straight, 0 },
-                { WinnerType.Flush, 0 },
-                { WinnerType.FullHouse, 0 },
-                { WinnerType.FourKind, 0 },
-                { WinnerType.StraightFlush, 0 },
-                { WinnerType.RoyalFlush, 0 },
-            };
+                new KeyValuePair<WinnerType, int>(WinnerType.None, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.JacksOrBetter, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.TwoPair, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.ThreeKind, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.Straight, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.Flush, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.FullHouse, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.FourKind, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.StraightFlush, 0),
+                new KeyValuePair<WinnerType, int>(WinnerType.RoyalFlush, 0),
+            });
         }
 
-
-        private void GetCombinationsRecursive(List<Card> deck, VideoPokerHandViewModel hand, List<Card> currentCombination, int start, int combinationSize, Dictionary<WinnerType, int> results)
+        private void GetCombinationsRecursive(List<Card> deck, VideoPokerHandViewModel hand, List<Card> currentCombination, int start, int combinationSize, ConcurrentDictionary<WinnerType, int> results)
         {
             if (currentCombination.Count == combinationSize)
             {
@@ -348,7 +357,7 @@ namespace Services
                 hand.Card4 = currentCombination[3];
                 hand.Card5 = currentCombination[4];
                 var winType = CheckJacksOrBetterWinners(hand);
-                results[winType]++;
+                results.AddOrUpdate(winType, 1, (key, oldValue) => oldValue + 1);
                 return;
             }
 
