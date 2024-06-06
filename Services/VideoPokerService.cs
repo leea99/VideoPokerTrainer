@@ -268,46 +268,73 @@ namespace Services
 
         public List<HoldInfo> CalculateBestHolds(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable)
         {
-            List<Card?> handCards = new List<Card?>()
-            {
-                hand.Card1,
-                hand.Card2,
-                hand.Card3,
-                hand.Card4,
-                hand.Card5,
-            };
+            List<Card?> handCards = HandToList(hand);
             var combo = new List<List<Card>>();
             GenerateCombinations(deck, hand, handCards, 0, new List<Card>(), combo);
             var expectedCred = new ConcurrentBag<HoldInfo>();
             Parallel.ForEach(combo, c =>
             {
-                var outcomeTotals = InitializeComboDictionary(); 
-                var localHand = new VideoPokerHandViewModel()
-                {
-                    Card1 = hand.Card1,
-                    Card2 = hand.Card2,
-                    Card3 = hand.Card3,
-                    Card4 = hand.Card4,
-                    Card5 = hand.Card5,
-                    CreditsWagered = hand.CreditsWagered
-                };
-                GetCombinationsRecursive(deck.GetCurrentDeck(), localHand, c, 0, 5, outcomeTotals);
-                double totalPayout = 0;
-                int totalOutcomes = outcomeTotals.Values.Sum();
-                foreach (var result in outcomeTotals)
-                {
-                    double prob = (double)result.Value / (double)totalOutcomes;
-                    totalPayout += GetWonCredits(payTable, result.Key, hand.CreditsWagered.GetValueOrDefault()) * prob;
-                }
-                expectedCred.Add(new HoldInfo()
-                {
-                    HeldCards = c,
-                    HoldShorthand = GetHandShort(c),
-                    Outcomes = outcomeTotals,
-                    ExpectedCredits = totalPayout
-                });
+                ConcurrentDictionary<WinnerType, int> outcomeTotals;
+                double totalPayout;
+                GetHoldInfo(deck, hand, payTable, c, out outcomeTotals, out totalPayout);
+                expectedCred.Add(GetHoldInfo(deck, hand, payTable, c, out outcomeTotals, out totalPayout));
             });
             return expectedCred.OrderByDescending(x => x.ExpectedCredits).ToList();
+        }
+
+        public List<Card?> HandToList(VideoPokerHandViewModel hand)
+        {
+            var cardList = new List<Card>();
+            if (hand.Card1 != null)
+            {
+                cardList.Add(hand.Card1);
+            }
+            if (hand.Card2 != null)
+            {
+                cardList.Add(hand.Card2);
+            }
+            if (hand.Card3 != null)
+            {
+                cardList.Add(hand.Card3);
+            }
+            if (hand.Card4 != null)
+            {
+                cardList.Add(hand.Card4);
+            }
+            if (hand.Card5 != null)
+            {
+                cardList.Add(hand.Card5);
+            }
+            return cardList;
+        }
+
+        public HoldInfo GetHoldInfo(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable, List<Card> c, out ConcurrentDictionary<WinnerType, int> outcomeTotals, out double totalPayout)
+        {
+            outcomeTotals = InitializeComboDictionary();
+            var localHand = new VideoPokerHandViewModel()
+            {
+                Card1 = hand.Card1,
+                Card2 = hand.Card2,
+                Card3 = hand.Card3,
+                Card4 = hand.Card4,
+                Card5 = hand.Card5,
+                CreditsWagered = hand.CreditsWagered
+            };
+            GetCombinationsRecursive(deck.GetCurrentDeck(), localHand, c, 0, 5, outcomeTotals);
+            totalPayout = 0;
+            int totalOutcomes = outcomeTotals.Values.Sum();
+            foreach (var result in outcomeTotals)
+            {
+                double prob = (double)result.Value / (double)totalOutcomes;
+                totalPayout += GetWonCredits(payTable, result.Key, hand.CreditsWagered.GetValueOrDefault()) * prob;
+            }
+            return new HoldInfo()
+            {
+                HeldCards = c,
+                HoldShorthand = GetHandShort(c),
+                Outcomes = outcomeTotals,
+                ExpectedCredits = totalPayout
+            };
         }
 
         private void GenerateCombinations(Deck? deck, VideoPokerHandViewModel hand, List<Card> cards, int index, List<Card> current, List<List<Card>> results)
@@ -376,7 +403,7 @@ namespace Services
                 return "Discard All";
             }
             string shorthandStr = "";
-            foreach (var card in heldCards)
+            foreach (var card in heldCards.Where(x => x != null))
             {
                 shorthandStr += card.GetShorthandStr();
             }

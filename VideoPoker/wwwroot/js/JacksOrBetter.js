@@ -133,16 +133,13 @@
     function ShowEV() {
         var heldCards = GetHeldCards();
         $.ajax({
-            url: '/VideoPoker/GetHeldShorthand',
+            url: '/VideoPoker/GetHeldEv',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(heldCards), // Convert data to JSON string
             success: function (data) {
-                console.log(data);
-                var match = $('.holdShorthand[shorthand="' + data + '"]');
-                console.log(match);
-                $('.holdShorthand').addClass('d-none');
-                match.removeClass('d-none');
+                var creditsStr = parseFloat(data.expectedCredits).toFixed(3);
+                $('#holdEv').text(creditsStr);
             },
             error: function (xhr, status, error) {
                 console.error('Error fetching partial view:', error);

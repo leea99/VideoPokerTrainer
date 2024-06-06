@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models;
 using Newtonsoft.Json;
 using Services;
+using System.Collections.Concurrent;
 using System.Security.AccessControl;
 using System.Text.Json.Serialization;
 using ViewModels;
@@ -69,9 +70,9 @@ namespace VideoPoker.Controllers
             videoPokerCards.CreditsWagered = creditsWager;
             videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
             HttpContext.Session.SetString("Deck", JsonConvert.SerializeObject(deck));
-            var bestHolds = _videoPokerService.CalculateBestHolds(deck, videoPokerCards, payTable);
+            //var bestHolds = _videoPokerService.CalculateBestHolds(deck, videoPokerCards, payTable);
             var handData = UpdateHandData(videoPokerCards);
-            handData.HoldInfo = bestHolds;
+            //handData.HoldInfo = bestHolds;
             return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", handData);
         }
 
@@ -80,19 +81,15 @@ namespace VideoPoker.Controllers
         {
             PayTableItem[]? payTable = GetPayTableFromSession();
             int? wagerAmount = GetWager();
-            var deckStr = HttpContext.Session.GetString("Deck");
-            if (deckStr != null)
+            var deck = GetDeckFromSession();
+            if (deck != null)
             {
-                var deck = JsonConvert.DeserializeObject<Deck?>(deckStr);
-                if (deck != null)
-                {
-                    var videoPokerCards = _videoPokerService.DrawCards(heldCards, deck);
-                    videoPokerCards.CreditsWagered = wagerAmount;
-                    videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
-                    videoPokerCards.CreditsWon = _videoPokerService.GetWonCredits(payTable, videoPokerCards.WinnerType, wagerAmount.GetValueOrDefault());
-                    UpdateCreditBalance(videoPokerCards.CreditsWon);
-                    return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", UpdateHandData(videoPokerCards));
-                }
+                var videoPokerCards = _videoPokerService.DrawCards(heldCards, deck);
+                videoPokerCards.CreditsWagered = wagerAmount;
+                videoPokerCards.WinnerType = _videoPokerService.CheckJacksOrBetterWinners(videoPokerCards);
+                videoPokerCards.CreditsWon = _videoPokerService.GetWonCredits(payTable, videoPokerCards.WinnerType, wagerAmount.GetValueOrDefault());
+                UpdateCreditBalance(videoPokerCards.CreditsWon);
+                return PartialView("~/Views/Shared/VideoPoker/_CardRow.cshtml", UpdateHandData(videoPokerCards));
             }
             return RedirectToAction("DealCards");
         }
@@ -142,10 +139,16 @@ namespace VideoPoker.Controllers
         }
 
         [HttpPost]
-        public IActionResult GetHeldShorthand([FromBody] VideoPokerHandViewModel? heldCards)
+        public IActionResult GetHeldEv([FromBody] VideoPokerHandViewModel? heldCards)
         {
-            var heldList = _videoPokerService.GetCardList(heldCards);
-            return Json(_videoPokerService.GetHandShort(heldList));
+            heldCards.CreditsWagered = GetWager();
+            Deck? deck = GetDeckFromSession();
+            PayTableItem[]? payTable = GetPayTableFromSession();
+            var cardList = _videoPokerService.HandToList(heldCards);
+            ConcurrentDictionary<WinnerType, int> outcomeTotals;
+            double totalPayout;
+            var holdDetails = _videoPokerService.GetHoldInfo(deck, heldCards, payTable, cardList, out outcomeTotals, out totalPayout);
+            return Json(holdDetails);
         }
 
         private void SetGameSession(VideoPokerGameViewModel? gameSession)
@@ -176,6 +179,17 @@ namespace VideoPoker.Controllers
                 payTable = gameSession.PayTable;
             }
             return payTable;
+        }
+
+        private Deck? GetDeckFromSession()
+        {
+            Deck? deck = null;
+            var deckStr = HttpContext.Session.GetString("Deck");
+            if (deckStr != null)
+            {
+                deck = JsonConvert.DeserializeObject<Deck?>(deckStr);
+            }
+            return deck;
         }
 
         private int? GetWager()

@@ -4,13 +4,7 @@
         <p>@Models.EnumExtensions.GetDisplayName(Model.HandViewModel.WinnerType)</p>
     </div>
     <div class="row">
-        @if (Model.HoldInfo != null)
-        {
-            @foreach (var hold in Model.HoldInfo)
-            {
-                <p shorthand="@hold.HoldShorthand" class="holdShorthand d-none">@("Expected Value of Hold: " + hold.ExpectedCredits.ToString("0.000"))</p>
-            }
-        }
+        <p id="holdEv"></p>
     </div>
 </div>
 <div class="row">

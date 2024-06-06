@@ -1,5 +1,6 @@
 ﻿using Models;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ namespace IServices
         int? BetMax(PayTableItem[]? payTable);
         VideoPokerGameViewModel? UpdateGameBalance(VideoPokerGameViewModel? gameData, int? creditChange);
         List<HoldInfo> CalculateBestHolds(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable);
+        public List<Card?> HandToList(VideoPokerHandViewModel hand);
+        HoldInfo GetHoldInfo(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable, List<Card> c, out ConcurrentDictionary<WinnerType, int> outcomeTotals, out double totalPayout);
         string GetHandShort(List<Card> heldCards);
     }
 }
