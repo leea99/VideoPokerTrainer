@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
@@ -310,7 +311,8 @@ namespace Services
 
         public HoldInfo GetHoldInfo(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable, List<Card> c, out ConcurrentDictionary<WinnerType, int> outcomeTotals, out double totalPayout)
         {
-            outcomeTotals = InitializeComboDictionary();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            stopwatch.Start();
             var localHand = new VideoPokerHandViewModel()
             {
                 Card1 = hand.Card1,
@@ -320,6 +322,8 @@ namespace Services
                 Card5 = hand.Card5,
                 CreditsWagered = hand.CreditsWagered
             };
+            DeckOperations(deck, localHand);
+            outcomeTotals = InitializeComboDictionary();
             GetCombinationsRecursive(deck.GetCurrentDeck(), localHand, c, 0, 5, outcomeTotals);
             totalPayout = 0;
             int totalOutcomes = outcomeTotals.Values.Sum();
@@ -328,6 +332,7 @@ namespace Services
                 double prob = (double)result.Value / (double)totalOutcomes;
                 totalPayout += GetWonCredits(payTable, result.Key, hand.CreditsWagered.GetValueOrDefault()) * prob;
             }
+            stopwatch.Stop();
             return new HoldInfo()
             {
                 HeldCards = c,
@@ -409,5 +414,36 @@ namespace Services
             }
             return shorthandStr;
         }
+
+        private void DeckOperations(Deck? deck, VideoPokerHandViewModel hand)
+        {
+            if (deck != null)
+            {
+                var outcomeTotals = InitializeComboDictionary();
+                var grouped = deck.GetRankGroups();
+                var heldCards = HandToList(hand);
+                var slots = deck.GetFullDeckSize() - deck.GetCurrentDeckSize() - heldCards.Count;
+                int fourKind = 0;
+                foreach (var group in grouped)
+                {
+                    //fourKind += Combination(deck.GetCurrentDeckSize() - group.Count(), group)
+                }
+            }
+        }
+
+        private int Combination(int n, int k)
+        {
+            if (k > n) return 0;
+            if (k == 0 || k == n) return 1;
+
+            int result = 1;
+            for (int i = 1; i <= k; i++)
+            {
+                result = result * (n - i + 1) / i;
+            }
+
+            return result;
+        }
     }
 }
+

@@ -66,5 +66,32 @@ namespace Models
         {
             return cards;
         }
+
+        public IGrouping<Rank, Card>[] GetRankGroups()
+        {
+            return cards.GroupBy(x => x.Rank).ToArray();
+        }
+
+        public void AddCardToDeck(Card? card)
+        {
+            if (card != null && cards != null)
+            {
+                cards.Add(card);
+            }
+        }
+
+        public int GetFullDeckSize()
+        {
+            return Enum.GetNames(typeof(Suit)).Length * Enum.GetNames(typeof(Rank)).Length;
+        }
+
+        public int GetCurrentDeckSize()
+        {
+            if (cards != null)
+            {
+                return cards.Count;
+            }
+            return 0;
+        }
     }
 }
