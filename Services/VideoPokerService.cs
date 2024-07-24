@@ -428,13 +428,22 @@ namespace Services
                 {
                     var heldMatch = heldCards.Where(x => x.Rank == group.Key).Count();
                     var totalRank = heldMatch + group.Count();
-                    if (totalRank + heldMatch >= 4 && slots + heldMatch >= 4)
+                    if (totalRank >= 4 && slots + heldMatch >= 4)
                     {
-                        //Need to account for throwing away a part of a pair.
-                        fourKind += Combination(deck.GetCurrentDeckSize() - group.Count(), slots - group.Count());
+                        CheckFourOfKinds(deck, outcomeTotals, slots, group);
                     }
                 }
             }
+        }
+
+        private void CheckFourOfKinds(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, IGrouping<Rank, Card> group)
+        {
+            var groupFourCards = Combination(group.Count(), group.Count());
+            if (slots - group.Count() > 0)
+            {
+                groupFourCards *= Combination(deck.GetCurrentDeckSize() - group.Count(), slots - group.Count());
+            }
+            outcomeTotals[WinnerType.FourKind] += groupFourCards;
         }
 
         private int Combination(int n, int k)
