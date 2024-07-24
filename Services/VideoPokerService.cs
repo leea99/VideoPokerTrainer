@@ -426,7 +426,13 @@ namespace Services
                 int fourKind = 0;
                 foreach (var group in grouped)
                 {
-                    //fourKind += Combination(deck.GetCurrentDeckSize() - group.Count(), group)
+                    var heldMatch = heldCards.Where(x => x.Rank == group.Key).Count();
+                    var totalRank = heldMatch + group.Count();
+                    if (totalRank + heldMatch >= 4 && slots + heldMatch >= 4)
+                    {
+                        //Need to account for throwing away a part of a pair.
+                        fourKind += Combination(deck.GetCurrentDeckSize() - group.Count(), slots - group.Count());
+                    }
                 }
             }
         }
