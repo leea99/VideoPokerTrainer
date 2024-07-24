@@ -422,8 +422,10 @@ namespace Services
                 var outcomeTotals = InitializeComboDictionary();
                 var grouped = deck.GetRankGroups();
                 var heldCards = HandToList(hand);
+                var heldGroups = heldCards.GroupBy(card => card.Rank).ToDictionary(group => group.Key, group => group.Count());
                 var slots = deck.GetFullDeckSize() - deck.GetCurrentDeckSize() - heldCards.Count;
-                int fourKind = 0;
+                int needed = 0;
+                int leftover = 0;
                 foreach (var group in grouped)
                 {
                     var heldMatch = heldCards.Where(x => x.Rank == group.Key).Count();
@@ -432,8 +434,39 @@ namespace Services
                     {
                         CheckFourOfKinds(deck, outcomeTotals, slots, group);
                     }
+                    if (totalRank >= 3 && slots + heldMatch >= 3 && heldMatch <= 3)
+                    {
+                        CheckThreeKind(deck, outcomeTotals, slots, out needed, out leftover, group, heldMatch);
+                    }
+                    if (totalRank >= 2 && slots + heldMatch >= 2 && heldMatch <= 2)
+                    {
+                        needed = 2 - heldMatch;
+                        var groupPairs = Combination(group.Count(), needed);
+                        leftover = group.Count() - needed;
+                        if (slots - (2 - heldMatch) > 0)
+                        {
+                            int remainingDeckSize = deck.GetCurrentDeckSize() - needed - leftover;
+                            int remainingSlots = slots - needed;
+                            groupPairs *= Combination(remainingDeckSize, remainingSlots);
+                        }
+                        outcomeTotals[WinnerType.JacksOrBetter] += groupPairs;
+                    }
                 }
             }
+        }
+
+        private void CheckThreeKind(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, out int needed, out int leftover, IGrouping<Rank, Card> group, int heldMatch)
+        {
+            needed = 3 - heldMatch;
+            var groupThreeCards = Combination(group.Count(), needed);
+            leftover = group.Count() - needed;
+            if (slots - needed > 0)
+            {
+                int remainingDeckSize = deck.GetCurrentDeckSize() - needed - leftover;
+                int remainingSlots = slots - needed;
+                groupThreeCards *= Combination(remainingDeckSize, remainingSlots);
+            }
+            outcomeTotals[WinnerType.ThreeKind] += groupThreeCards;
         }
 
         private void CheckFourOfKinds(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, IGrouping<Rank, Card> group)
