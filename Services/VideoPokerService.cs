@@ -268,7 +268,7 @@ namespace Services
         }
 
         public List<HoldInfo> CalculateBestHolds(Deck? deck, VideoPokerHandViewModel hand, PayTableItem[]? payTable)
-        {
+       {
             List<Card?> handCards = HandToList(hand);
             var combo = new List<List<Card>>();
             GenerateCombinations(deck, hand, handCards, 0, new List<Card>(), combo);
@@ -313,6 +313,7 @@ namespace Services
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             stopwatch.Start();
+            CalculateBestHolds(deck, hand, payTable);
             var localHand = new VideoPokerHandViewModel()
             {
                 Card1 = hand.Card1,
@@ -436,26 +437,56 @@ namespace Services
                     }
                     if (totalRank >= 3 && slots + heldMatch >= 3 && heldMatch <= 3)
                     {
-                        CheckThreeKind(deck, outcomeTotals, slots, out needed, out leftover, group, heldMatch);
+                        needed = 5 - heldCards.Count();
+                        int threeKind = CheckThreeKind(deck, slots, out needed, out leftover, group, heldMatch);
+                        if (heldGroups.Count <= 2 && heldGroups.OrderByDescending(x => x.Value).First().Value <= 3) //Exclude holds of more than two ranks or greater than 3 cards of one rank.
+                        {
+                            int fullHouse = 0;
+                            switch (heldCards.Count())
+                            {
+                                case 0:
+
+                                    break;
+                                case 1:
+                                    break;
+                                case 2:
+                                    break;
+                                case 3:
+                                    break;
+                                case 4:
+                                    break;
+                                case 5:
+                                    fullHouse++;
+                                    break;
+                            }
+
+                            //Check if group can form two or three cards.
+                        }
+                        outcomeTotals[WinnerType.ThreeKind] += threeKind;
                     }
                     if (totalRank >= 2 && slots + heldMatch >= 2 && heldMatch <= 2)
                     {
-                        needed = 2 - heldMatch;
-                        var groupPairs = Combination(group.Count(), needed);
-                        leftover = group.Count() - needed;
-                        if (slots - (2 - heldMatch) > 0)
-                        {
-                            int remainingDeckSize = deck.GetCurrentDeckSize() - needed - leftover;
-                            int remainingSlots = slots - needed;
-                            groupPairs *= Combination(remainingDeckSize, remainingSlots);
-                        }
-                        outcomeTotals[WinnerType.JacksOrBetter] += groupPairs;
+                        CheckJacksOrBetter(deck, outcomeTotals, slots, out needed, out leftover, group, heldMatch);
                     }
                 }
             }
         }
 
-        private void CheckThreeKind(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, out int needed, out int leftover, IGrouping<Rank, Card> group, int heldMatch)
+        private void CheckJacksOrBetter(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, out int needed, out int leftover, IGrouping<Rank, Card> group, int heldMatch)
+        {
+            needed = 2 - heldMatch;
+            var groupPairs = Combination(group.Count(), needed);
+            leftover = group.Count() - needed;
+            if (slots - (2 - heldMatch) > 0)
+            {
+                int remainingDeckSize = deck.GetCurrentDeckSize() - needed - leftover;
+                int remainingSlots = slots - needed;
+                groupPairs *= Combination(remainingDeckSize, remainingSlots);
+            }
+            outcomeTotals[WinnerType.JacksOrBetter] += groupPairs;
+        }
+
+        private int CheckThreeKind(Deck? deck, int slots, out int needed, out int leftover, IGrouping<Rank, Card> group, int heldMatch)
         {
             needed = 3 - heldMatch;
             var groupThreeCards = Combination(group.Count(), needed);
@@ -466,7 +497,7 @@ namespace Services
                 int remainingSlots = slots - needed;
                 groupThreeCards *= Combination(remainingDeckSize, remainingSlots);
             }
-            outcomeTotals[WinnerType.ThreeKind] += groupThreeCards;
+            return groupThreeCards;
         }
 
         private void CheckFourOfKinds(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, IGrouping<Rank, Card> group)
