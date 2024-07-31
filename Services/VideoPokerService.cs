@@ -313,7 +313,6 @@ namespace Services
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
             stopwatch.Start();
-            CalculateBestHolds(deck, hand, payTable);
             var localHand = new VideoPokerHandViewModel()
             {
                 Card1 = hand.Card1,
@@ -427,49 +426,55 @@ namespace Services
                 var slots = deck.GetFullDeckSize() - deck.GetCurrentDeckSize() - heldCards.Count;
                 int needed = 0;
                 int leftover = 0;
-                foreach (var group in grouped)
+                foreach (var groupA in grouped)
                 {
-                    var heldMatch = heldCards.Where(x => x.Rank == group.Key).Count();
-                    var totalRank = heldMatch + group.Count();
+                    var heldMatch = heldCards.Where(x => x.Rank == groupA.Key).Count();
+                    var totalRank = heldMatch + groupA.Count();
                     if (totalRank >= 4 && slots + heldMatch >= 4)
                     {
-                        CheckFourOfKinds(deck, outcomeTotals, slots, group);
+                        CheckFourOfKinds(deck, outcomeTotals, slots, groupA);
                     }
                     if (totalRank >= 3 && slots + heldMatch >= 3 && heldMatch <= 3)
                     {
                         needed = 5 - heldCards.Count();
-                        int threeKind = CheckThreeKind(deck, slots, out needed, out leftover, group, heldMatch);
-                        if (heldGroups.Count <= 2 && heldGroups.OrderByDescending(x => x.Value).First().Value <= 3) //Exclude holds of more than two ranks or greater than 3 cards of one rank.
+                        int threeKind = CheckThreeKind(deck, slots, out needed, out leftover, groupA, heldMatch);
+                        if (heldGroups.Count <= 2 && heldGroups.Count > 0 && heldGroups.OrderByDescending(x => x.Value).First().Value <= 3) //Exclude holds of more than two ranks or greater than 3 cards of one rank.
                         {
-                            int fullHouse = 0;
-                            switch (heldCards.Count())
+                            int groupAMatch = 0;
+                            heldGroups.TryGetValue(groupA.Key, out groupAMatch);
+                            int groupATotal = groupAMatch + groupA.Count();
+                            foreach (var groupB in grouped)
                             {
-                                case 0:
-
-                                    break;
-                                case 1:
-                                    break;
-                                case 2:
-                                    break;
-                                case 3:
-                                    break;
-                                case 4:
-                                    break;
-                                case 5:
-                                    fullHouse++;
-                                    break;
+                                if (groupB.Key != groupA.Key)
+                                {
+                                    int groupBMatch = 0;
+                                    heldGroups.TryGetValue(groupB.Key, out groupBMatch);
+                                    int groupBTotal = groupBMatch + groupB.Count();             
+                                    if (groupATotal >= 3  && groupBTotal >= 2) //Held card is not currently not being accounted for in the calculations.
+                                    {
+                                        outcomeTotals[WinnerType.FullHouse] += Combination(groupA.Count() - groupAMatch, 3 - groupAMatch) * Combination(groupB.Count() - groupBMatch, 2 - groupBMatch);
+                                    }
+                                    if (groupBTotal >= 3 && groupATotal >= 2)
+                                    {
+                                        outcomeTotals[WinnerType.FullHouse] += Combination(groupB.Count() - groupBMatch, 3 - groupBMatch) * Combination(groupA.Count() - groupAMatch, 2 - groupAMatch);
+                                    }
+                                }
                             }
-
                             //Check if group can form two or three cards.
                         }
                         outcomeTotals[WinnerType.ThreeKind] += threeKind;
                     }
                     if (totalRank >= 2 && slots + heldMatch >= 2 && heldMatch <= 2)
                     {
-                        CheckJacksOrBetter(deck, outcomeTotals, slots, out needed, out leftover, group, heldMatch);
+                        CheckJacksOrBetter(deck, outcomeTotals, slots, out needed, out leftover, groupA, heldMatch);
                     }
                 }
             }
+        }
+
+        private bool AddFullHouse(int groupA, int groupB)
+        {
+            return false;
         }
 
         private void CheckJacksOrBetter(Deck? deck, ConcurrentDictionary<WinnerType, int> outcomeTotals, int slots, out int needed, out int leftover, IGrouping<Rank, Card> group, int heldMatch)
