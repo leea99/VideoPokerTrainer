@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Security.AccessControl;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ViewModels;
 using static Models.Statics;
@@ -434,34 +437,34 @@ namespace Services
                     {
                         CheckFourOfKinds(deck, outcomeTotals, slots, groupA);
                     }
-                    if (totalRank >= 3 && slots + heldMatch >= 3 && heldMatch <= 3)
+                    if (totalRank >= 3 && slots + heldMatch >= 3 && heldMatch <= 3) 
                     {
                         needed = 5 - heldCards.Count();
                         int threeKind = CheckThreeKind(deck, slots, out needed, out leftover, groupA, heldMatch);
-                        if (heldGroups.Count <= 2 && heldGroups.Count > 0 && heldGroups.OrderByDescending(x => x.Value).First().Value <= 3) //Exclude holds of more than two ranks or greater than 3 cards of one rank.
+                        int groupAMatch = 0;
+                        heldGroups.TryGetValue(groupA.Key, out groupAMatch);
+                        int groupATotal = groupAMatch + groupA.Count();
+                        foreach (var groupB in grouped)
                         {
-                            int groupAMatch = 0;
-                            heldGroups.TryGetValue(groupA.Key, out groupAMatch);
-                            int groupATotal = groupAMatch + groupA.Count();
-                            foreach (var groupB in grouped)
+                            if (groupB.Key != groupA.Key)
                             {
-                                if (groupB.Key != groupA.Key)
+                                if (heldCards.Count() == 0)
+                                {
+                                    outcomeTotals[WinnerType.FullHouse] += Combination(groupA.Count(), 3) * Combination(groupB.Count(), 2);
+                                }
+                                else if (CheckFullHouseCapable(heldCards, heldGroups, groupA, groupB))
                                 {
                                     int groupBMatch = 0;
                                     heldGroups.TryGetValue(groupB.Key, out groupBMatch);
-                                    int groupBTotal = groupBMatch + groupB.Count();             
-                                    if (groupATotal >= 3  && groupBTotal >= 2) //Held card is not currently not being accounted for in the calculations.
+                                    int groupBTotal = groupBMatch + groupB.Count();
+                                    if (groupATotal >= 3 && groupBTotal >= 2) //Held card is not currently not being accounted for in the calculations.
                                     {
-                                        outcomeTotals[WinnerType.FullHouse] += Combination(groupA.Count() - groupAMatch, 3 - groupAMatch) * Combination(groupB.Count() - groupBMatch, 2 - groupBMatch);
-                                    }
-                                    if (groupBTotal >= 3 && groupATotal >= 2)
-                                    {
-                                        outcomeTotals[WinnerType.FullHouse] += Combination(groupB.Count() - groupBMatch, 3 - groupBMatch) * Combination(groupA.Count() - groupAMatch, 2 - groupAMatch);
+                                        outcomeTotals[WinnerType.FullHouse] += Combination(groupA.Count(), 3 - groupAMatch) * Combination(groupB.Count(), 2 - groupBMatch);
                                     }
                                 }
                             }
-                            //Check if group can form two or three cards.
                         }
+                        //Check if group can form two or three cards.
                         outcomeTotals[WinnerType.ThreeKind] += threeKind;
                     }
                     if (totalRank >= 2 && slots + heldMatch >= 2 && heldMatch <= 2)
@@ -470,6 +473,37 @@ namespace Services
                     }
                 }
             }
+        }
+
+        private static bool CheckFullHouseCapable(List<Card?> heldCards, Dictionary<Rank, int> heldGroups, IGrouping<Rank, Card> groupA, IGrouping<Rank, Card> groupB)
+        {
+            if (heldGroups.Count == 1 && (heldCards.Any(x => x.Rank == groupB.Key) || heldCards.Any(x => x.Rank == groupA.Key))) 
+            {
+                return true;
+            }
+            if (heldGroups.Count == 2 && heldCards.Any(x => x.Rank == groupB.Key) && heldCards.Any(x => x.Rank == groupA.Key))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool CheckFullHouse(VideoPokerHandViewModel hand, Dictionary<Rank, int> heldGroups, int heldMatch, IGrouping<Rank, Card> groupA, IGrouping<Rank, Card> groupB)
+        {
+            if (groupB.Key != groupA.Key)
+            {
+                return false;
+            }
+            //if (heldGroups.Count() > 2)
+            //{
+            //    return false;
+            //}
+            //if (heldGroups.Any(x => x.Value > 3))
+            //{
+            //    return false;
+            //}
+            //if (heldGroups.Count() == 2)
+                return true;
         }
 
         private bool AddFullHouse(int groupA, int groupB)
